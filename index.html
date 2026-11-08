@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="de-AT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Punschstand Leopoldi</title>
+  <style>
+    :root{--bg:#0f1115;--panel:#171a20;--card:#20242b;--line:#343a43;--text:#f5f7fa;--muted:#aab2bd;--accent:#6fbe44;--danger:#d7463b}
+    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    button,input{font:inherit}button{touch-action:manipulation}.app{padding:14px;max-width:1400px;margin:auto}.top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.brand{font-size:22px;font-weight:800;margin-right:auto}.search{min-height:46px;min-width:240px;flex:1;max-width:520px;border:1px solid var(--line);border-radius:12px;background:#11141a;color:var(--text);padding:0 14px;font-size:16px}.reset{min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:white;padding:0 15px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:14px;margin-top:14px}.cats{display:flex;gap:8px;overflow:auto;padding-bottom:8px;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}.cat{white-space:nowrap;border:1px solid var(--line);background:var(--card);color:white;border-radius:11px;min-height:46px;padding:0 16px}.cat.active{background:var(--accent);color:#111;font-weight:800;border-color:var(--accent)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.product{min-height:106px;border:1px solid var(--line);background:var(--card);border-radius:13px;color:white;padding:12px;text-align:left;display:flex;flex-direction:column;justify-content:space-between}.product:active{transform:scale(.985)}.pname{font-weight:750;line-height:1.15}.detail{font-size:13px;color:var(--muted);margin-top:4px}.price{font-size:19px;font-weight:800;color:var(--accent);margin-top:8px}.side{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:14px;align-self:start}.side h2,.side h3{margin:0 0 10px}.cart{display:flex;flex-direction:column;gap:8px}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.rowname{font-weight:700}.rowsub{font-size:13px;color:var(--muted);margin-top:3px}.controls{display:flex;gap:6px;align-items:center}.qty{min-width:40px;text-align:center}.ctrl{width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:#252a31;color:white;font-size:20px}.total{display:flex;justify-content:space-between;align-items:end;padding:16px 0;border-bottom:1px solid var(--line)}.total strong{font-size:30px;color:var(--accent)}.cash{margin-top:16px}.cash input{width:100%;min-height:54px;background:#11141a;color:white;border:1px solid var(--line);border-radius:12px;padding:0 14px;font-size:24px}.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}.quick button{min-height:44px;background:#252a31;color:white;border:1px solid var(--line);border-radius:10px}.change{margin-top:12px;padding:13px;border-radius:12px;background:#11141a}.change strong{font-size:30px;color:var(--accent)}.status{font-size:13px;color:var(--muted);margin-top:4px}.empty{color:var(--muted);text-align:center;padding:18px 0}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(min-width:1200px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  
+    @media(max-width:560px){.cats{flex-wrap:wrap}.cat{padding:0 11px}.search{min-width:0}}
+    button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div class="brand">Punschstand Leopoldi</div><input type="search" aria-label="Produkt suchen" id="search" class="search" placeholder="Produkt suchen…"><button id="reset" class="reset">Neuer Bon</button></div>
+  <div class="layout">
+    <main><div id="cats" class="cats" role="group" aria-label="Produktkategorien"></div><div id="grid" class="grid"></div></main>
+    <aside class="side">
+      <h2>Bon <span id="count" style="color:var(--muted);font-weight:500;font-size:14px"></span></h2>
+      <div id="cart" class="cart"></div>
+      <div class="total"><span>Gesamt</span><strong id="total">0,00 €</strong></div>
+      <div class="cash"><h3>Barzahlung / Rückgeld</h3><input id="given" aria-label="Bar gegeben" inputmode="decimal" placeholder="Gegeben, z. B. 20,00"><div class="quick"><button data-cash="10">10 €</button><button data-cash="20">20 €</button><button data-cash="30">30 €</button><button data-cash="40">40 €</button><button data-cash="50">50 €</button><button data-cash="60">60 €</button><button data-cash="70">70 €</button><button data-cash="80">80 €</button><button data-cash="90">90 €</button><button data-cash="100">100 €</button><button id="exact">Genau</button></div><div class="change"><div id="cash-result-label">Rückgeld</div><strong id="change">0,00 €</strong><div id="status" class="status" role="status">Barbetrag eingeben.</div></div></div>
+    </aside>
+  </div>
+</div>
+<script>
+const products = [
+  {"c": "Heiße Getränke", "n": "Beeren Punsch", "d": "0,25 l", "p": 550, "id": 1},
+  {"c": "Heiße Getränke", "n": "Apfelstrudel Punsch", "d": "0,25 l", "p": 550, "id": 2},
+  {"c": "Heiße Getränke", "n": "Amaretto Punsch", "d": "0,25 l", "p": 650, "id": 3},
+  {"c": "Heiße Getränke", "n": "Turbo Punsch", "d": "0,25 l", "p": 750, "id": 4},
+  {"c": "Heiße Getränke", "n": "Glühwein rot", "d": "0,25 l", "p": 550, "id": 5},
+  {"c": "Heiße Getränke", "n": "Kinderpunsch", "d": "0,25 l", "p": 450, "id": 6},
+  {"c": "Kaffee", "n": "Kleiner Espresso", "d": "Kleiner Brauner", "p": 350, "id": 7},
+  {"c": "Kaffee", "n": "Großer Espresso", "d": "Großer Brauner", "p": 450, "id": 8},
+  {"c": "Wein", "n": "Weißer Spritzer / WG Hagn", "d": "0,25 l", "p": 410, "id": 9},
+  {"c": "Wein", "n": "Weißer Spritzer / WG Hagn", "d": "0,50 l", "p": 820, "id": 10},
+  {"c": "Bier", "n": "Bier Dose", "d": "0,50 l · inkl. 0,25 € Pfand", "p": 500, "id": 11},
+  {"c": "Spirituosen", "n": "Espresso Martini Shot", "d": "2 cl", "p": 350, "id": 12},
+  {"c": "Spirituosen", "n": "Mittis Zirbenschnaps", "d": "2 cl", "p": 350, "id": 13},
+  {"c": "Spirituosen", "n": "Jägermeister", "d": "2 cl", "p": 350, "id": 14},
+  {"c": "Spirituosen", "n": "Berliner Luft", "d": "2 cl", "p": 350, "id": 15},
+  {"c": "Alkoholfrei", "n": "Red Bull", "d": "0,25 l · inkl. 0,25 € Pfand", "p": 500, "id": 16},
+  {"c": "Alkoholfrei", "n": "Frucade", "d": "0,50 l · inkl. 0,25 € Pfand", "p": 400, "id": 17},
+  {"c": "Alkoholfrei", "n": "Eistee", "d": "0,50 l · inkl. 0,25 € Pfand", "p": 400, "id": 18},
+  {"c": "Alkoholfrei", "n": "Mineral prickelnd", "d": "0,50 l · inkl. 0,25 € Pfand", "p": 380, "id": 19},
+  {"c": "Alkoholfrei", "n": "Mineral still", "d": "0,50 l · inkl. 0,25 € Pfand", "p": 380, "id": 20},
+  {"c": "Alkoholfrei", "n": "Himbeerwasser", "d": "0,50 l · Jugendgetränk / Aktion Kindernachmittag", "p": 350, "id": 21},
+  {"c": "Pfand", "n": "Einwegpfand zurück", "d": "Dose / Flasche · je Stück", "p": -25, "id": 22}
+];
+const cats = ["Heiße Getränke", "Kaffee", "Wein", "Bier", "Spirituosen", "Alkoholfrei", "Pfand"];
+let cat = cats[0];
+const quantities = new Map();
+const euros = new Intl.NumberFormat('de-AT', { style: 'currency', currency: 'EUR' });
+const money = (cents) => euros.format(cents / 100);
+const el = (id) => document.getElementById(id);
+const total = () => products.reduce((sum, p) => sum + p.p * (quantities.get(p.id) || 0), 0);
+
+function adjust(id, delta) {
+  const count = (quantities.get(id) || 0) + delta;
+  if (count > 0) quantities.set(id, count);
+  else quantities.delete(id);
+  renderCart();
+}
+
+function renderCats() {
+  el('cats').replaceChildren(...cats.map((category) => {
+    const button = document.createElement('button');
+    button.className = 'cat' + (category === cat ? ' active' : '');
+    button.textContent = category;
+    button.setAttribute('aria-pressed', String(category === cat));
+    button.onclick = () => {
+      cat = category;
+      for (const tab of el('cats').children) {
+        const active = tab === button;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-pressed', String(active));
+      }
+      renderProducts();
+    };
+    return button;
+  }));
+}
+
+function renderProducts() {
+  const term = el('search').value.toLowerCase().trim();
+  const matches = products.filter((p) => p.c === cat && (!term || (p.n + ' ' + p.d).toLowerCase().includes(term)));
+  el('grid').replaceChildren(...matches.map((p) => {
+    const button = document.createElement('button');
+    button.className = 'product';
+    button.innerHTML = '<div><div class="pname">' + p.n + '</div><div class="detail">' + p.d +
+      '</div></div><div class="price">' + money(p.p) + '</div>';
+    button.onclick = () => adjust(p.id, 1);
+    return button;
+  }));
+  if (!matches.length) el('grid').innerHTML = '<div class="empty">Keine passenden Produkte.</div>';
+}
+
+function renderCart() {
+  const cart = el('cart');
+  const focus = document.activeElement?.dataset.cartControl;
+  cart.replaceChildren();
+  let count = 0;
+  for (const p of products) {
+    const n = quantities.get(p.id);
+    if (!n) continue;
+    count += n;
+    const row = document.createElement('div');
+    row.className = 'row';
+    const info = document.createElement('div');
+    info.innerHTML = '<div class="rowname">' + p.n + '</div><div class="rowsub">' + p.d + '</div>' +
+      '<div class="rowsub">' + n + ' × ' + money(p.p) + ' = ' + money(n * p.p) + '</div>';
+    const controls = document.createElement('div');
+    controls.className = 'controls';
+    const minus = cartButton(p, -1);
+    const plus = cartButton(p, 1);
+    const qty = document.createElement('div');
+    qty.className = 'qty';
+    qty.textContent = n;
+    controls.append(minus, qty, plus);
+    row.append(info, controls);
+    cart.append(row);
+  }
+  if (!count) cart.innerHTML = '<div class="empty">Noch keine Produkte gewählt.</div>';
+  if (focus) {
+    const next = [...cart.querySelectorAll('button')].find((button) => button.dataset.cartControl === focus);
+    (next || cart.querySelector('button') || el('reset')).focus({ preventScroll: true });
+  }
+  el('count').textContent = count ? '(' + count + ' Artikel)' : '';
+  el('total').textContent = money(total());
+  updateChange();
+}
+
+function cartButton(product, delta) {
+  const button = document.createElement('button');
+  button.className = 'ctrl';
+  button.textContent = delta < 0 ? '−' : '+';
+  button.setAttribute('aria-label', product.n + ' ' + product.d + (delta < 0 ? ' entfernen' : ' hinzufügen'));
+  button.dataset.cartControl = product.id + ':' + delta;
+  button.onclick = () => adjust(product.id, delta);
+  return button;
+}
+
+function parseCash(raw) {
+  const value = raw.trim();
+  if (!/^\d{1,8}([,.]\d{0,2})?$/.test(value)) return null;
+  const [whole, fraction = ''] = value.split(/[,.]/);
+  return Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+}
+
+function updateChange() {
+  const amount = el('given').value;
+  const given = parseCash(amount);
+  const sum = total();
+  el('cash-result-label').textContent = sum < 0 ? 'Pfand auszahlen' : 'Rückgeld';
+  el('change').textContent = money(0);
+  el('given').setAttribute('aria-invalid', String(Boolean(amount.trim()) && given === null && sum >= 0));
+  if (!quantities.size) {
+    el('status').textContent = 'Bon starten.';
+  } else if (sum < 0) {
+    el('change').textContent = money(-sum);
+    el('status').textContent = 'Pfandbetrag auszahlen.';
+  } else if (given === null) {
+    el('status').textContent = amount.trim() ? 'Bitte einen gültigen Barbetrag eingeben.' : 'Barbetrag eingeben.';
+  } else if (given < sum) {
+    el('status').textContent = 'Es fehlen ' + money(sum - given) + '.';
+  } else {
+    el('change').textContent = money(given - sum);
+    el('status').textContent = given === sum ? 'Passend bezahlt.' : 'Rückgeld auszahlen.';
+  }
+}
+
+el('search').addEventListener('input', renderProducts);
+el('given').addEventListener('input', updateChange);
+document.querySelectorAll('[data-cash]').forEach((button) => {
+  button.onclick = () => {
+    el('given').value = Number(button.dataset.cash).toFixed(2).replace('.', ',');
+    updateChange();
+  };
+});
+el('exact').onclick = () => {
+  el('given').value = (Math.max(0, total()) / 100).toFixed(2).replace('.', ',');
+  updateChange();
+};
+el('reset').onclick = () => {
+  quantities.clear();
+  el('given').value = '';
+  renderCart();
+};
+renderCats();
+renderProducts();
+renderCart();
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  navigator.serviceWorker.register('./sw.js').catch((error) => console.warn('Offline-Start konnte nicht aktiviert werden.', error));
+}
+</script>
+</body></html>
